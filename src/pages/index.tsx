@@ -1,15 +1,20 @@
-import Head from 'next/head';
-import { Inter } from '@next/font/google';
-import React from 'react';
+import React, { useState } from 'react';
 import Chart from 'chart.js/auto';
+import Header from 'src/components/header';
+import Axis from 'src/components/axis';
+import { cerealType } from 'src/type/cereal.type';
+import { axisType } from 'src/type/axis.type';
+import styles from './index.module.css';
 
-const inter = Inter({ subsets: ['latin'] });
+export default function Home(props: { cereals: cerealType[] }) {
+  // 初期値にはX軸、Y軸で固定値をセット
+	const [xAxis, setXAxis] = useState<axisType>('calories');
+	const [yAxis, setYAxis] = useState<axisType>('protein');
 
-export default function Home(props: any) {
   React.useEffect(() => {
-    let myChart: any = null;
-    const cereals = props.cereals.map((cereal: any) => {
-      return { x: cereal.calories, y: cereal.carbo };
+    let myChart: Chart;
+    const cereals = props.cereals.map((cereal: cerealType) => {
+      return { x: cereal[xAxis], y: cereal[yAxis] };
     });
     const config: any = {
       type: 'scatter',
@@ -33,7 +38,7 @@ export default function Home(props: any) {
             display: true,
             title: {
               display: true,
-              text: 'Calories',
+              text: xAxis,
               font: {
                 size: 20,
                 weight: 'bold',
@@ -46,7 +51,7 @@ export default function Home(props: any) {
             display: true,
             title: {
               display: true,
-              text: 'Carbo',
+              text: yAxis,
               font: {
                 size: 20,
                 weight: 'bold',
@@ -63,33 +68,42 @@ export default function Home(props: any) {
       config
     );
     return () => {
-      myChart.destroy();
+			myChart.destroy();
     };
-  }, []);
+  }, [xAxis, yAxis]);
   return (
     <>
-      <Head>
-        <title>chart-js-app</title>
-        <meta name="description" content="Chart.jsで散布図を表示するアプリ" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+      <Header />
       <main>
-        <section style={{ padding: '10pt' }}>
+        <section className={styles.section}>
           <h1>chart-js-app</h1>
           <p>シリアルのデータ</p>
-          <div style={{ width: '400pt' }}>
-            <canvas id="myChart" width="300" height="300"></canvas>
+          <div className={styles.chartBox}>
+            <canvas id="myChart" className={styles.canvas}></canvas>
           </div>
         </section>
+        <h4 className={styles.axisContext}>X軸、Y軸について</h4>
+        {/* X軸 */}
+        <Axis
+          setAxisVal={setXAxis}
+          axisType={'X'}
+          notSelectedAxisVal={yAxis}
+        />
+        {/* Y軸 */}
+        <Axis
+          setAxisVal={setYAxis}
+          axisType={'Y'}
+          notSelectedAxisVal={xAxis}
+        />
       </main>
     </>
   );
 }
 
-export async function getServerSideProps(context: any) {
+// シリアルのデータを取得
+export async function getServerSideProps() {
   const response = await fetch('http://localhost:3000/api/cereals');
-  const cereals = await response.json();
+	const cereals: cerealType[] = await response.json();
   return {
     props: { cereals },
   };
