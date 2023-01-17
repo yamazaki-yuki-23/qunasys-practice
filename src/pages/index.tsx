@@ -2,20 +2,39 @@ import React, { useState } from 'react';
 import Chart from 'chart.js/auto';
 import Header from 'src/components/header';
 import Axis from 'src/components/axis';
+import Search from 'src/components/search';
 import { cerealType } from 'src/type/cereal.type';
 import { axisType } from 'src/type/axis.type';
 import styles from './index.module.css';
 
-export default function Home(props: { cereals: cerealType[] }) {
+export default function Home
+  (
+    props: {
+      cereals: cerealType[],
+      uniqMfrArr: string[],
+      uniqTypeArr: string[]
+    }
+  )
+{
   // 初期値にはX軸、Y軸で固定値をセット
 	const [xAxis, setXAxis] = useState<axisType>('calories');
 	const [yAxis, setYAxis] = useState<axisType>('protein');
 
+  // 初期値には空文字でデータは絞り込みしない
+  const [searchMfrKey, setSearchMfrKey] = useState('');
+  const [searchTypeKey, setSearchTypeKey] = useState('');
+
   React.useEffect(() => {
     let myChart: Chart;
-    const cereals = props.cereals.map((cereal: cerealType) => {
+
+    // グラフに表示するデータ
+    const cereals = props.cereals.filter((cereal: cerealType) => {
+      return (!searchMfrKey || searchMfrKey === cereal['mfr']) && 
+      (!searchTypeKey || searchTypeKey === cereal['type'])
+    }).map(cereal => {
       return { x: cereal[xAxis], y: cereal[yAxis] };
-    });
+    })
+
     const config: any = {
       type: 'scatter',
       data: {
@@ -70,7 +89,7 @@ export default function Home(props: { cereals: cerealType[] }) {
     return () => {
 			myChart.destroy();
     };
-  }, [xAxis, yAxis]);
+  }, [xAxis, yAxis, searchMfrKey, searchTypeKey]);
   return (
     <>
       <Header />
@@ -95,6 +114,13 @@ export default function Home(props: { cereals: cerealType[] }) {
           axisType={'Y'}
           notSelectedAxisVal={xAxis}
         />
+        <h4 className={styles.SearchContext}>グラフに表示するデータの絞り込み</h4>
+        <Search
+          setSearchMfrKey={setSearchMfrKey}
+          setSearchTypeKey={setSearchTypeKey}
+          uniqMfrArr={props.uniqMfrArr}
+          uniqTypeArr={props.uniqTypeArr}
+        />
       </main>
     </>
   );
@@ -104,7 +130,17 @@ export default function Home(props: { cereals: cerealType[] }) {
 export async function getServerSideProps() {
   const response = await fetch('http://localhost:3000/api/cereals');
 	const cereals: cerealType[] = await response.json();
+
+  // 先にfilterで重複排除してからmapで対象キーの値を返す
+  const uniqMfrArr: string[] = cereals.filter((el: cerealType, ind: number, self: cerealType[]) => {
+    return self.findIndex((e) => e.mfr === el.mfr) === ind
+  }).map(cereal => cereal['mfr']);
+
+  const uniqTypeArr: string[] = cereals.filter((el: cerealType, ind: number, self: cerealType[]) => {
+    return self.findIndex((e) => e.type === el.type) === ind
+  }).map(cereal => cereal['type']);
+  
   return {
-    props: { cereals },
+    props: { cereals, uniqMfrArr, uniqTypeArr },
   };
 }
