@@ -127,8 +127,12 @@ export default function Home
 }
 
 // シリアルのデータを取得
-export async function getServerSideProps() {
-  const response = await fetch('http://localhost:3000/api/cereals');
+export async function getServerSideProps(ctx: { req: { headers: { referer: string, host: string } } }) {
+  // データ取得URLの生成
+  const protocol = ctx.req.headers.referer?.split('://')[0] || 'http';
+  const url = `${protocol}://${ctx.req.headers.host}`;
+  
+  const response = await fetch(`${url}/api/cereals`);
 	const cereals: cerealType[] = await response.json();
 
   // 先にfilterで重複排除してからmapで対象キーの値を返す
