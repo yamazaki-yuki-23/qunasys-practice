@@ -15,4 +15,4 @@ export type cerealType = {
   weight: string;
   cups: string;
   rating: string;
-}
+};

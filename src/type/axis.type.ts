@@ -1,4 +1,4 @@
-export type axisType = 
+export type axisType =
   | 'calories'
   | 'protein'
   | 'fat'
@@ -11,5 +11,4 @@ export type axisType =
   | 'shelf'
   | 'weight'
   | 'cups'
-  | 'rating'
-;
+  | 'rating';
