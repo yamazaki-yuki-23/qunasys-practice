@@ -19,7 +19,10 @@ export default function Search(props: {
     <>
       <div>
         <label>mfr ：</label>
-        <select onChange={(e) => handleMfrChange(e.target.value)}>
+        <select
+          onChange={(e) => handleMfrChange(e.target.value)}
+          id='mfrSearch'
+        >
           <option value=''>選択してください</option>
           {uniqMfrArr.map((val) => (
             <option key={val} value={val}>
@@ -30,7 +33,10 @@ export default function Search(props: {
       </div>
       <div>
         <label>type：</label>
-        <select onChange={(e) => handleTypeChange(e.target.value)}>
+        <select
+          onChange={(e) => handleTypeChange(e.target.value)}
+          id='typeSearch'
+        >
           <option value=''>選択してください</option>
           {uniqTypeArr.map((val) => (
             <option key={val} value={val}>

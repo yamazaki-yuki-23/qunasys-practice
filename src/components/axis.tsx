@@ -17,7 +17,10 @@ export default function Axis(props: {
     <>
       <div>
         現在の{axisType}軸：
-        <select onChange={(e) => handleChange(e.target.value as axisType)}>
+        <select
+          onChange={(e) => handleChange(e.target.value as axisType)}
+          id={`axis${axisType}`}
+        >
           {properties.map(
             (property) =>
               property != notSelectedAxisVal && (
